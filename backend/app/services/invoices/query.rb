@@ -5,7 +5,7 @@ module Invoices
     end
 
     def relation(filters = {})
-      scope = @account.invoices.order(created_at: :desc, id: :desc)
+      scope = @account.invoices.includes(:customer).order(created_at: :desc, id: :desc)
       scope = scope.where(status: filters[:status]) if filters[:status].present?
       scope = scope.where(customer_id: filters[:customer_id]) if filters[:customer_id].present?
       scope
