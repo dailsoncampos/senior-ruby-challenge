@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { SummaryCards } from "../components/SummaryCards";
 import { InvoiceTable } from "../components/InvoiceTable";
 import { useDashboardSummary, useInvoices } from "../hooks/useInvoices";
@@ -12,7 +12,11 @@ export function DashboardPage() {
   const invoices = useInvoices();
   const [status, setStatus] = useState<(typeof FILTERS)[number]>("all");
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const visibleInvoices = selectVisibleInvoices(invoices.data?.invoices ?? [], status);
+  const pageInvoices = invoices.data?.invoices;
+  const visibleInvoices = useMemo(
+    () => selectVisibleInvoices(pageInvoices ?? [], status),
+    [pageInvoices, status]
+  );
 
   return (
     <section className="page">
