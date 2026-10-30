@@ -31,6 +31,10 @@ module Ai
       request.body = JSON.generate(request_body(filename, content))
 
       handle_response(http.request(request))
+    rescue Net::OpenTimeout, Net::ReadTimeout, Net::WriteTimeout => error
+      raise ProviderTimeoutError, "provider timed out (#{error.class})"
+    rescue SocketError, Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, OpenSSL::SSL::SSLError => error
+      raise UnavailableError, "provider unreachable (#{error.class}: #{error.message})"
     end
 
     private
@@ -57,7 +61,9 @@ module Ai
       case response.code.to_i
       when 200
         parsed = JSON.parse(response.body)
-        content = parsed.dig("choices", 0, "message", "content")
+        content = parsed.dig("choices", 0, "message", "content") if parsed.is_a?(Hash)
+        raise InvalidResponseError, "provider response has no message content" if content.to_s.empty?
+
         JSON.parse(content)
       when 429
         raise RateLimitError, "provider rate limit"
