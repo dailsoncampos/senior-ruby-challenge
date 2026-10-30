@@ -12,8 +12,9 @@ class DocumentProcessingJob
   def perform(document_id)
     document = Document.find(document_id)
     return if already_processed?(document)
+    return unless claim(document)
 
-    document.update!(status: "processing")
+    document.reload
     payload = Ai::InvoiceExtractionService.new.extract(filename: document.filename)
 
     ActiveRecord::Base.transaction do
@@ -36,5 +37,12 @@ class DocumentProcessingJob
 
   def already_processed?(document)
     document.status == "processed"
+  end
+
+  private
+
+  def claim(document)
+    Document.where(id: document.id, status: %w[pending failed])
+            .update_all(status: "processing", updated_at: Time.current) == 1
   end
 end
