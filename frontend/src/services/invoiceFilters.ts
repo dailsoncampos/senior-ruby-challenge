@@ -13,17 +13,19 @@ export function resetFilterDiagnostics(): void {
 export function selectVisibleInvoices(invoices: Invoice[], status: string): VisibleInvoice[] {
   filterDiagnostics.computations += 1;
 
+  // Build cluster map in O(n)
+  const clusterMap = new Map<string, number>();
+  for (const invoice of invoices) {
+    filterDiagnostics.comparisons += 1;
+    const key = `${invoice.customer_name}|${invoice.status}`;
+    clusterMap.set(key, (clusterMap.get(key) ?? 0) + 1);
+  }
+
+  // Map and filter in O(n)
   return invoices
-    .map((invoice) => {
-      filterDiagnostics.comparisons += 1;
-      let clusterSize = 0;
-      for (const other of invoices) {
-        filterDiagnostics.comparisons += 1;
-        if (other.customer_name === invoice.customer_name && other.status === invoice.status) {
-          clusterSize += 1;
-        }
-      }
-      return { ...invoice, clusterSize };
-    })
+    .map((invoice) => ({
+      ...invoice,
+      clusterSize: clusterMap.get(`${invoice.customer_name}|${invoice.status}`) ?? 0
+    }))
     .filter((invoice) => status === "all" || invoice.status === status);
 }
