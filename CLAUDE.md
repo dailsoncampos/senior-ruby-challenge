@@ -16,6 +16,15 @@ Session tasks: @docs/candidate-instructions.md
 5. Verify: the task's challenge spec + the full baseline suite
 6. Close with: what changed and why it is correct, trade-offs, residual risk,
    and what to monitor in production
+7. Commit: after I approve the result of step 6, stage only the task's files by
+   path (never `git add -A`; never `docker-compose.yml`). Write focused commits
+   with messages describing what changed (e.g. `fix: scope invoice lookup to the
+   current account`). No AI attribution or co-author lines
+8. Open PR: push the branch and open a PR against `sdd/main` with
+   `gh pr create --repo dailsoncampos/senior-ruby-challenge --base sdd/main`.
+   Write the body in English with these sections: Problem, Motivation, Solution,
+   Tests, and Implications (only if there are any; include trade-offs, residual
+   risk, and monitoring from step 6). No AI attribution
 
 ## Commands (always through Docker)
 - Single spec: `docker compose exec -e RAILS_ENV=test backend bundle exec rspec spec/path_spec.rb:42`
