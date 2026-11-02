@@ -12,10 +12,9 @@ export function DashboardPage() {
   const invoices = useInvoices();
   const [status, setStatus] = useState<(typeof FILTERS)[number]>("all");
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const pageInvoices = invoices.data?.invoices;
   const visibleInvoices = useMemo(
-    () => selectVisibleInvoices(pageInvoices ?? [], status),
-    [pageInvoices, status]
+    () => selectVisibleInvoices(invoices.data?.invoices ?? [], status),
+    [invoices.data?.invoices, status]
   );
 
   return (
