@@ -15,6 +15,10 @@ module Ai
       end
 
       validate!(stringify_keys(raw))
+    rescue Ai::RetryableError
+      raise
+    rescue StandardError => error
+      raise Ai::InvalidResponseError, "Extraction failed: #{error.message}"
     end
 
     private

@@ -17,6 +17,11 @@ class DocumentProcessingJob
     document.reload
     payload = Ai::InvoiceExtractionService.new.extract(filename: document.filename)
 
+    unless valid_extraction?(payload)
+      document.update!(status: "failed")
+      return
+    end
+
     ActiveRecord::Base.transaction do
       ExtractionRun.create!(
         account_id: document.account_id,
@@ -30,9 +35,8 @@ class DocumentProcessingJob
   rescue Ai::RetryableError
     document.update!(status: "pending")
     raise
-  rescue Ai::Error => error
+  rescue Ai::InvalidResponseError, Ai::ConfigurationError
     document.update!(status: "failed")
-    Rails.logger.warn("[DocumentProcessingJob] document=#{document.id} failed: #{error.class}: #{error.message}")
   end
 
   def already_processed?(document)
@@ -44,5 +48,11 @@ class DocumentProcessingJob
   def claim(document)
     Document.where(id: document.id, status: %w[pending failed])
             .update_all(status: "processing", updated_at: Time.current) == 1
+  end
+
+  def valid_extraction?(payload)
+    return false unless payload.is_a?(Hash)
+    required_fields = ["invoice_number", "amount_cents", "currency", "vendor_name"]
+    required_fields.all? { |field| payload.key?(field) && !payload[field].nil? }
   end
 end

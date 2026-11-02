@@ -1,4 +1,4 @@
-import { memo } from "react";
+import React from "react";
 import { recordRowRender } from "../diagnostics/renderProbe";
 import { formatMoney } from "../services/money";
 import type { VisibleInvoice } from "../types/invoice";
@@ -9,10 +9,10 @@ interface InvoiceRowProps {
   invoice: VisibleInvoice;
   selected: boolean;
   onSelect: (invoiceId: number) => void;
-  toneColor: string;
+  tone: string;
 }
 
-export const InvoiceRow = memo(function InvoiceRow({ invoice, selected, onSelect, toneColor }: InvoiceRowProps) {
+export const InvoiceRow = React.memo(function InvoiceRow({ invoice, selected, onSelect, tone }: InvoiceRowProps) {
   recordRowRender(invoice.id);
 
   return (
@@ -20,7 +20,7 @@ export const InvoiceRow = memo(function InvoiceRow({ invoice, selected, onSelect
       data-testid={`invoice-row-${invoice.id}`}
       data-cluster-size={invoice.clusterSize}
       className={selected ? "is-selected" : undefined}
-      style={{ boxShadow: `inset 3px 0 0 ${toneColor}` }}
+      style={{ boxShadow: `inset 3px 0 0 ${tone}` }}
     >
       <td>
         <Link to={`/invoices/${invoice.id}`}>{invoice.invoice_number}</Link>

@@ -1,0 +1,27 @@
+"permissions": {
+  "allow": [
+    "Bash(docker compose exec -T -e RAILS_ENV=test backend bundle exec rspec:*)",
+    "Bash(docker compose exec -e RAILS_ENV=test backend bundle exec rspec:*)",
+    "Bash(docker compose exec -T frontend npm test:*)",
+    "Bash(docker compose exec -T frontend npm run test:challenge:*)",
+    "Bash(docker compose exec -T frontend npx tsc --noEmit:*)",
+    "Bash(docker compose ps:*)",
+    "Bash(docker compose logs:*)",
+    "Bash(git status:*)",
+    "Bash(git diff:*)",
+    "Bash(git log:*)"
+  ],
+  "ask": [
+    "Bash(git push:*)",
+    "Bash(gh pr create:*)"
+  ],
+  "deny": [
+    "Read(./.env)",
+    "Read(./.env.*)",
+    "Edit(./backend/spec/challenges/**)",
+    "Edit(./frontend/src/challenge/**)",
+    "Edit(./backend/db/seeds.rb)",
+    "Bash(docker compose down -v:*)",
+    "Bash(make reset:*)"
+  ]
+}

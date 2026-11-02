@@ -40,7 +40,7 @@ export function InvoiceTable({
               invoice={invoice}
               selected={invoice.id === selectedId}
               onSelect={onSelect}
-              toneColor={TONES[invoice.status]}
+              tone={TONES[invoice.status]}
             />
           ))}
         </tbody>
