@@ -15,7 +15,7 @@ module Api
     end
 
     def show
-      invoice = Invoice.includes(:customer, :documents).find(params[:id])
+      invoice = current_account.invoices.includes(:customer, :documents).find(params[:id])
       render json: InvoiceSerializer.new(invoice, include_details: true).as_json
     end
 
