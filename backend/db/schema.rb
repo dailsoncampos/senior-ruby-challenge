@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_27_120006) do
+ActiveRecord::Schema[7.2].define(version: 2026_10_31_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -89,7 +89,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_27_120006) do
     t.index ["account_id"], name: "index_ledger_entries_on_account_id"
     t.index ["external_event_id"], name: "index_ledger_entries_on_external_event_id"
     t.index ["invoice_id"], name: "index_ledger_entries_on_invoice_id"
-    t.index ["payment_event_id"], name: "index_ledger_entries_on_payment_event_id"
+    t.index ["payment_event_id"], name: "index_ledger_entries_on_payment_event_id", unique: true
     t.check_constraint "amount_cents > 0", name: "ledger_entries_amount_cents_positive"
   end
 
@@ -105,7 +105,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_27_120006) do
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_payment_events_on_account_id"
     t.index ["invoice_id"], name: "index_payment_events_on_invoice_id"
-    t.index ["provider", "external_event_id"], name: "index_payment_events_on_provider_and_external_event_id"
+    t.index ["provider", "external_event_id"], name: "index_payment_events_on_provider_and_external_event_id", unique: true
   end
 
   add_foreign_key "customers", "accounts"
