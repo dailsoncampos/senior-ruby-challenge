@@ -16,4 +16,14 @@ RSpec.describe DocumentProcessingJob do
     )
     expect(document.extraction_runs.count).to eq(1)
   end
+
+  it "fails the document when retries are exhausted" do
+    document = create(:document, filename: "scenario-timeout.pdf", status: "pending")
+
+    described_class.sidekiq_retries_exhausted_block.call(
+      { "args" => [document.id] }, Ai::ProviderTimeoutError.new("timeout")
+    )
+
+    expect(document.reload.status).to eq("failed")
+  end
 end
