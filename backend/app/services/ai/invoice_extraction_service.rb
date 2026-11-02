@@ -10,12 +10,10 @@ module Ai
     def extract(filename:)
       raw = @provider.extract_invoice(filename: filename)
       Timeout.timeout(@timeout_seconds) { stringify_keys(raw) }
+    rescue Ai::RetryableError
+      raise
     rescue StandardError => error
-      {
-        "status" => "error",
-        "message" => error.message,
-        "error_class" => error.class.name
-      }
+      raise Ai::InvalidResponseError, "Extraction failed: #{error.message}"
     end
 
     private
