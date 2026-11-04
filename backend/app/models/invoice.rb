@@ -6,6 +6,7 @@ class Invoice < ApplicationRecord
   has_many :payment_events, dependent: :destroy
   has_many :documents, dependent: :destroy
   has_many :ledger_entries, dependent: :destroy
+  has_many :payment_suggestions, dependent: :destroy
 
   validates :invoice_number, :status, presence: true
   validates :amount_cents, presence: true, numericality: { only_integer: true, greater_than: 0 }

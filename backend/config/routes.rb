@@ -11,6 +11,13 @@ Rails.application.routes.draw do
       end
     end
 
+    resources :payment_suggestions, only: [] do
+      member do
+        post :confirm
+        post :reject
+      end
+    end
+
     namespace :webhooks do
       post "payments", to: "payments#create"
     end

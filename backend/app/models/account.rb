@@ -5,6 +5,7 @@ class Account < ApplicationRecord
   has_many :documents, dependent: :destroy
   has_many :ledger_entries, dependent: :destroy
   has_many :extraction_runs, dependent: :destroy
+  has_many :payment_suggestions, dependent: :destroy
 
   validates :name, presence: true
 end

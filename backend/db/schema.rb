@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_31_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_11_03_021231) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -43,7 +43,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_31_120000) do
     t.index ["account_id", "status"], name: "index_documents_on_account_id_and_status"
     t.index ["account_id"], name: "index_documents_on_account_id"
     t.index ["invoice_id"], name: "index_documents_on_invoice_id"
-    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying, 'processing'::character varying, 'processed'::character varying, 'failed'::character varying]::text[])", name: "documents_status_allowed"
+    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying::text, 'processing'::character varying::text, 'processed'::character varying::text, 'failed'::character varying::text])", name: "documents_status_allowed"
   end
 
   create_table "extraction_runs", force: :cascade do |t|
@@ -74,7 +74,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_31_120000) do
     t.index ["created_at"], name: "index_invoices_on_created_at"
     t.index ["customer_id"], name: "index_invoices_on_customer_id"
     t.check_constraint "amount_cents > 0", name: "invoices_amount_cents_positive"
-    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying, 'processing'::character varying, 'processed'::character varying, 'failed'::character varying]::text[])", name: "invoices_status_allowed"
+    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying::text, 'processing'::character varying::text, 'processed'::character varying::text, 'failed'::character varying::text])", name: "invoices_status_allowed"
   end
 
   create_table "ledger_entries", force: :cascade do |t|
@@ -95,7 +95,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_31_120000) do
 
   create_table "payment_events", force: :cascade do |t|
     t.bigint "account_id", null: false
-    t.bigint "invoice_id", null: false
+    t.bigint "invoice_id"
     t.string "provider", null: false
     t.string "external_event_id", null: false
     t.string "event_type", null: false
@@ -103,9 +103,30 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_31_120000) do
     t.datetime "processed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "payer_name"
+    t.text "reference"
+    t.integer "amount_cents"
     t.index ["account_id"], name: "index_payment_events_on_account_id"
     t.index ["invoice_id"], name: "index_payment_events_on_invoice_id"
     t.index ["provider", "external_event_id"], name: "index_payment_events_on_provider_and_external_event_id", unique: true
+  end
+
+  create_table "payment_suggestions", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "payment_event_id", null: false
+    t.bigint "invoice_id", null: false
+    t.string "status", default: "pending", null: false
+    t.string "matched_by", null: false
+    t.datetime "confirmed_at"
+    t.string "confirmed_by"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "status"], name: "index_payment_suggestions_on_account_id_and_status"
+    t.index ["account_id"], name: "index_payment_suggestions_on_account_id"
+    t.index ["invoice_id"], name: "index_payment_suggestions_on_invoice_id"
+    t.index ["payment_event_id", "invoice_id"], name: "index_payment_suggestions_on_payment_event_id_and_invoice_id", unique: true
+    t.index ["payment_event_id"], name: "index_payment_suggestions_on_payment_event_id"
+    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying, 'confirmed'::character varying, 'rejected'::character varying]::text[])", name: "payment_suggestions_status_allowed"
   end
 
   add_foreign_key "customers", "accounts"
@@ -120,4 +141,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_31_120000) do
   add_foreign_key "ledger_entries", "payment_events"
   add_foreign_key "payment_events", "accounts"
   add_foreign_key "payment_events", "invoices"
+  add_foreign_key "payment_suggestions", "accounts"
+  add_foreign_key "payment_suggestions", "invoices"
+  add_foreign_key "payment_suggestions", "payment_events"
 end
